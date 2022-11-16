@@ -1,25 +1,39 @@
-import logo from './logo.svg';
-import './App.css';
+import useFetch from "./useFetch";
+import useLocalStorage from "./useLocalStorage";
+import React from "react";
 
 function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+  const [produto, setProduto] = useLocalStorage("produto", "");
+  const { request, data, loading, error } = useFetch();
+
+  React.useEffect(() => {
+    async function fetchData() {
+      const {response, json} = await request(
+        `https://ranekapi.origamid.dev/json/api/produto/`
+      );
+    }
+    fetchData();
+  }, [request]);
+
+  function handleClick({ target }) {
+    setProduto(target.innerText);
+  }
+  if (error) return <p>{error}</p>;
+  if (loading) return <p>Carregando...</p>;
+  if (data)
+    return (
+      <div className="App">
+        <p>Produto preferido: {produto}</p>
+        <button onClick={handleClick}>Notebook </button>
+        <button onClick={handleClick}>SmartPhone </button>
+        {data.map((produto) => (
+          <div key={produto.id}>
+            <h1>{produto.nome}</h1>
+          </div>
+        ))}
+      </div>
+    );
+  else return null;
 }
 
 export default App;
